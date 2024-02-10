@@ -100,6 +100,9 @@ public class Percolation {
         if (nRoot == NOT_SUITABLE || nRoot == rootToSet) {
             return;
         }
+        if (getSiteInitValue(row, col) == rootToSet) {
+            return; // remove loop
+        }
         setValue(row, col, rootToSet);
         if (nRoot > TOP_ROOT) {
             int bpRow = nRoot / n;
@@ -164,9 +167,16 @@ public class Percolation {
     }
 
     public void printGrid() {
+        String ANSI_RESET = "\u001B[0m";
+        String ANSI_BLUE = "\u001B[34m";
         for (int i = 0; i < this.grid.length; i++) {
             for (int j = 0; j < this.grid[i].length; j++) {
-                System.out.printf("%4d", this.grid[i][j]);
+                if (getSiteInitValue(i, j) != this.grid[i][j]) {
+                    System.out.printf(ANSI_BLUE + "%4d" + ANSI_RESET, this.grid[i][j]);
+                }
+                else {
+                    System.out.printf("%4d", this.grid[i][j]);
+                }
             }
             System.out.println();
         }
@@ -176,28 +186,46 @@ public class Percolation {
         int enteredN = 5;
         Percolation p = new Percolation(enteredN);
 
-        // p.open(0, 1);
-        // p.open(1, 1);
-        // p.open(0, 3);
-        // // p.open(3, 4);
-        // // p.open(4, 4);
-        // p.printGrid();
-        // System.out.println(p.percolates());
 
-
-        // p.open(3, 4);
-        // p.open(2, 4);
-        // p.open(1, 4);
-        // p.open(2, 3);
-        // p.open(2, 0);
-        // p.open(3, 4);
-        // p.open(0, 1);
-        // p.open(1, 4);
-        // p.open(2, 2);
-        // p.open(1, 3);
-        // p.open(0, 0);
-        // p.open(1, 1);
-        // p.open(3, 2);
+        p.open(3, 4);
+        p.printGrid();
+        System.out.println();
+        p.open(2, 4);
+        p.printGrid();
+        System.out.println();
+        p.open(1, 4);
+        p.printGrid();
+        System.out.println();
+        p.open(2, 3);
+        p.printGrid();
+        System.out.println();
+        p.open(2, 0);
+        p.printGrid();
+        System.out.println();
+        p.open(0, 1);
+        p.printGrid();
+        System.out.println();
+        p.open(2, 2);
+        p.printGrid();
+        System.out.println();
+        p.open(1, 3);
+        p.printGrid();
+        System.out.println();
+        p.open(0, 0);
+        p.printGrid();
+        System.out.println();
+        p.open(1, 1);
+        p.printGrid();
+        System.out.println();
+        p.open(3, 2);
+        p.printGrid();
+        System.out.println();
+        p.open(4, 2);
+        p.printGrid();
+        System.out.println();
+        p.open(2, 1);
+        p.printGrid();
+        System.out.println(p.percolates());
 
 
         // for (int h = 0; h < 1000; h++) {

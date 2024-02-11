@@ -6,7 +6,6 @@ public class PercolationStats {
     private static final double PERCOLATION_THRESHOLD_CONST = 1.96;
     private final int trials;
     private final double[] results;
-    private final int maxT;
 
     public PercolationStats(int n, int trials) {
         if (n <= 0 || trials <= 0) {
@@ -14,12 +13,18 @@ public class PercolationStats {
         }
 
         this.trials = trials;
-        this.maxT = n * n;
         this.results = new double[trials];
-    }
 
-    private void registerResult(int num, int openSites) {
-        results[num] = (double) openSites / maxT;
+        int maxT = n * n;
+        for (int t = 0; t < trials; t++) {
+            Percolation p = new Percolation(n);
+            while (!p.percolates()) {
+                int row = StdRandom.uniformInt(1, n + 1);
+                int col = StdRandom.uniformInt(1, n + 1);
+                p.open(row, col);
+            }
+            results[t] = (double) p.numberOfOpenSites() / maxT;
+        }
     }
 
     // sample mean of percolation threshold
@@ -58,17 +63,6 @@ public class PercolationStats {
         }
 
         PercolationStats pstats = new PercolationStats(enteredN, trials);
-
-        for (int t = 0; t < trials; t++) {
-            Percolation p = new Percolation(enteredN);
-            while (!p.percolates()) {
-                int row = StdRandom.uniformInt(1, enteredN + 1);
-                int col = StdRandom.uniformInt(1, enteredN + 1);
-                p.open(row, col);
-            }
-            pstats.registerResult(t, p.numberOfOpenSites());
-        }
-
         StdOut.printf("mean                    = %.16f%n", pstats.mean());
         StdOut.printf("stddev                  = %.16f%n", pstats.stddev());
         StdOut.printf("95%% confidence interval = [%.16f, %.16f]%n", pstats.confidenceLo(),

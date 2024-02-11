@@ -104,7 +104,6 @@ public class Percolation {
             if (!isOpen(row, col)) {
                 return null;
             }
-            // TODO: Optimise
             int val = root(row, col);
             return new Point(row, col, val);
         }
@@ -149,8 +148,6 @@ public class Percolation {
         }
     }
 
-
-    // TODO: link to shortest root
     public void open(int row, int col) {
         this.validateIndexes(row, col);
         int val = this.grid[row][col];
@@ -167,7 +164,7 @@ public class Percolation {
         openSites++;
         boolean lastRow = row == this.n - 1;
         int selectedRoot;
-        if (row == 0) { // TODO: refactor
+        if (row == 0) {
             selectedRoot = topRootValue;
             setValue(row, col, selectedRoot);
             if (!isOpen(row + 1, col)) {
@@ -179,11 +176,11 @@ public class Percolation {
             }
         }
         else {
-            Point t = getNeighbour(row - 1, col);
-            Point b = getNeighbour(row + 1, col);
-            Point l = getNeighbour(row, col - 1);
-            Point r = getNeighbour(row, col + 1);
-            Point newRoot = getMin(t, b, l, r);
+            Point top = getNeighbour(row - 1, col);
+            Point bottom = getNeighbour(row + 1, col);
+            Point left = getNeighbour(row, col - 1);
+            Point right = getNeighbour(row, col + 1);
+            Point newRoot = getMin(top, bottom, left, right);
             if (newRoot == null) {
                 selectedRoot = singleSiteValue;
             }
@@ -193,10 +190,10 @@ public class Percolation {
 
             setValue(row, col, selectedRoot);
             int nVal = selectedRoot == singleSiteValue ? selfVal : selectedRoot;
-            updateNeighbour(row - 1, col, t, nVal);
-            updateNeighbour(row + 1, col, b, nVal);
-            updateNeighbour(row, col - 1, l, nVal);
-            updateNeighbour(row, col + 1, r, nVal);
+            updateNeighbour(row - 1, col, top, nVal);
+            updateNeighbour(row + 1, col, bottom, nVal);
+            updateNeighbour(row, col - 1, left, nVal);
+            updateNeighbour(row, col + 1, right, nVal);
         }
 
         if (lastRow) {

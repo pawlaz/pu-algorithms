@@ -6,6 +6,7 @@ public class PercolationStats {
     private final int trials;
     private final double[] results;
     private final int maxT;
+    private final double percolationThresholdConst = 1.96;
 
     public PercolationStats(int n, int trials) {
         if (n <= 0 || trials <= 0) {
@@ -33,12 +34,12 @@ public class PercolationStats {
 
     // low endpoint of 95% confidence interval
     public double confidenceLo() {
-        return mean() - (1.96 * stddev() / Math.sqrt(this.trials));
+        return mean() - (this.percolationThresholdConst * stddev() / Math.sqrt(this.trials));
     }
 
     // high endpoint of 95% confidence interval
     public double confidenceHi() {
-        return mean() + (1.96 * stddev() / Math.sqrt(this.trials));
+        return mean() + (this.percolationThresholdConst * stddev() / Math.sqrt(this.trials));
     }
 
     // test client (see below)

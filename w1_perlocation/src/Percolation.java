@@ -125,7 +125,7 @@ public class Percolation {
         linkElems(selfVal, row, col, right, row, col + 1);
     }
 
-    public boolean checkFull(int row, int col) {
+    private boolean checkFull(int row, int col) {
         this.validateIndexes(row, col);
         if (checkOpen(row, col)) {
             if (this.grid[row][col] == CONNECTED_TO_TOP) {

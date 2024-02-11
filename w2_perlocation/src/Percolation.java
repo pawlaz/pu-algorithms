@@ -1,12 +1,12 @@
 import edu.princeton.cs.algs4.WeightedQuickUnionUF;
 
 public class Percolation {
+    private static final int OPEN_VALUE = -1;
+    private static final int CONNECTED_TO_TOP = -2;
+    private static final int NOT_SUITABLE = -3;
     private final int n;
     private final int[][] grid;
     private final WeightedQuickUnionUF weightedUF;
-    private final int openValue = -1;
-    private final int connectedToTop = -2;
-    private final int notSuitableValue = -3;
     private boolean isPercolated = false;
     private int openSites = 0;
 
@@ -50,19 +50,19 @@ public class Percolation {
     public boolean isOpen(int row, int col) {
         this.validateIndexes(row, col);
         int val = this.grid[row][col];
-        return val == openValue || val == connectedToTop;
+        return val == OPEN_VALUE || val == CONNECTED_TO_TOP;
     }
 
     private int getNeighbour(int row, int col) {
         try {
             validateIndexes(row, col);
             if (!isOpen(row, col)) {
-                return notSuitableValue;
+                return NOT_SUITABLE;
             }
             return getSiteInitValue(row, col);
         }
         catch (IllegalArgumentException e) {
-            return notSuitableValue;
+            return NOT_SUITABLE;
         }
     }
 
@@ -73,7 +73,7 @@ public class Percolation {
 
     private void linkElems(int firstNumber, int fRow, int fCol, int secondNumber, int sRow,
                            int sCol) {
-        if (firstNumber == notSuitableValue || secondNumber == notSuitableValue) {
+        if (firstNumber == NOT_SUITABLE || secondNumber == NOT_SUITABLE) {
             return;
         }
         this.weightedUF.union(firstNumber, secondNumber);
@@ -81,13 +81,13 @@ public class Percolation {
         int fVal = this.grid[fRow][fCol];
         int sVal = this.grid[sRow][sCol];
 
-        if (fVal == connectedToTop || sVal == connectedToTop) {
-            this.grid[fRow][fCol] = connectedToTop;
-            this.grid[sRow][sCol] = connectedToTop;
+        if (fVal == CONNECTED_TO_TOP || sVal == CONNECTED_TO_TOP) {
+            this.grid[fRow][fCol] = CONNECTED_TO_TOP;
+            this.grid[sRow][sCol] = CONNECTED_TO_TOP;
             int newRoot = root(fRow, fCol);
             int rootrow = newRoot / n;
             int rootcol = newRoot - rootrow * n;
-            this.grid[rootrow][rootcol] = connectedToTop;
+            this.grid[rootrow][rootcol] = CONNECTED_TO_TOP;
         }
     }
 
@@ -104,7 +104,7 @@ public class Percolation {
             return; // already open
         }
 
-        int value = row == 0 ? connectedToTop : openValue;
+        int value = row == 0 ? CONNECTED_TO_TOP : OPEN_VALUE;
         setOpen(row, col, value);
 
         int top = getNeighbour(row - 1, col);
@@ -121,13 +121,13 @@ public class Percolation {
     public boolean isFull(int row, int col) {
         this.validateIndexes(row, col);
         if (isOpen(row, col)) {
-            if (this.grid[row][col] == connectedToTop) {
+            if (this.grid[row][col] == CONNECTED_TO_TOP) {
                 return true;
             }
             int root = root(row, col);
             int prow = root / n;
             int pcol = root - prow * n;
-            return this.grid[prow][pcol] == connectedToTop;
+            return this.grid[prow][pcol] == CONNECTED_TO_TOP;
         }
         return false;
     }

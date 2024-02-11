@@ -3,10 +3,10 @@ import edu.princeton.cs.algs4.StdRandom;
 import edu.princeton.cs.algs4.StdStats;
 
 public class PercolationStats {
+    private static final double PERCOLATION_THRESHOLD_CONST = 1.96;
     private final int trials;
     private final double[] results;
     private final int maxT;
-    private final double percolationThresholdConst = 1.96;
 
     public PercolationStats(int n, int trials) {
         if (n <= 0 || trials <= 0) {
@@ -34,12 +34,12 @@ public class PercolationStats {
 
     // low endpoint of 95% confidence interval
     public double confidenceLo() {
-        return mean() - (this.percolationThresholdConst * stddev() / Math.sqrt(this.trials));
+        return mean() - (PERCOLATION_THRESHOLD_CONST * stddev() / Math.sqrt(this.trials));
     }
 
     // high endpoint of 95% confidence interval
     public double confidenceHi() {
-        return mean() + (this.percolationThresholdConst * stddev() / Math.sqrt(this.trials));
+        return mean() + (PERCOLATION_THRESHOLD_CONST * stddev() / Math.sqrt(this.trials));
     }
 
     // test client (see below)

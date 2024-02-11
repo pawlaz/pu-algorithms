@@ -4,8 +4,9 @@ public class Percolation {
     private final int n;
     private final int[][] grid;
     private final WeightedQuickUnionUF weightedUF;
-    private final int openValue = 1;
-    private final int notSuitableValue = -1;
+    private final int openValue = -1;
+    private final int connectedToTop = -2;
+    private final int notSuitableValue = -3;
     private boolean isPercolated = false;
     private int openSites = 0;
 
@@ -15,7 +16,18 @@ public class Percolation {
         }
         this.n = n;
         this.grid = new int[n][n];
-        this.weightedUF = new WeightedQuickUnionUF(n);
+        this.weightedUF = new WeightedQuickUnionUF(n * n);
+        this.fillEmptyGrid();
+    }
+
+    private void fillEmptyGrid() {
+        int counter = 0;
+        for (int i = 0; i < this.n; i++) {
+            for (int j = 0; j < this.n; j++) {
+                this.grid[i][j] = counter;
+                counter++;
+            }
+        }
     }
 
     private void validateIndexes(int row, int col) {
@@ -37,7 +49,8 @@ public class Percolation {
 
     public boolean isOpen(int row, int col) {
         this.validateIndexes(row, col);
-        return this.grid[row][col] == openValue;
+        int val = this.grid[row][col];
+        return val == openValue || val == connectedToTop;
     }
 
     private int getNeighbour(int row, int col) {
@@ -53,16 +66,29 @@ public class Percolation {
         }
     }
 
-    private void setOpen(int row, int col) {
-        this.grid[row][col] = openValue;
+    private void setOpen(int row, int col, int val) {
+        this.grid[row][col] = val;
         openSites++;
     }
 
-    private void linkElems(int first, int second) {
-        if (first == notSuitableValue || second == notSuitableValue) {
+    private void linkElems(int firstNumber, int fRow, int fCol, int secondNumber, int sRow,
+                           int sCol) {
+        if (firstNumber == notSuitableValue || secondNumber == notSuitableValue) {
             return;
         }
-        this.weightedUF.union(first, second);
+        this.weightedUF.union(firstNumber, secondNumber);
+
+        int fVal = this.grid[fRow][fCol];
+        int sVal = this.grid[sRow][sCol];
+
+        if (fVal == connectedToTop || sVal == connectedToTop) {
+            this.grid[fRow][fCol] = connectedToTop;
+            this.grid[sRow][sCol] = connectedToTop;
+            int newRoot = root(fRow, fCol);
+            int rootrow = newRoot / n;
+            int rootcol = newRoot - rootrow * n;
+            this.grid[rootrow][rootcol] = connectedToTop;
+        }
     }
 
     public void open(int row, int col) {
@@ -78,24 +104,30 @@ public class Percolation {
             return; // already open
         }
 
-        setOpen(row, col);
+        int value = row == 0 ? connectedToTop : openValue;
+        setOpen(row, col, value);
 
         int top = getNeighbour(row - 1, col);
         int bottom = getNeighbour(row + 1, col);
         int left = getNeighbour(row, col - 1);
         int right = getNeighbour(row, col + 1);
 
-        linkElems(selfVal, top);
-        linkElems(selfVal, bottom);
-        linkElems(selfVal, left);
-        linkElems(selfVal, right);
+        linkElems(selfVal, row, col, top, row - 1, col);
+        linkElems(selfVal, row, col, bottom, row + 1, col);
+        linkElems(selfVal, row, col, left, row, col - 1);
+        linkElems(selfVal, row, col, right, row, col + 1);
     }
 
     public boolean isFull(int row, int col) {
         this.validateIndexes(row, col);
         if (isOpen(row, col)) {
+            if (this.grid[row][col] == connectedToTop) {
+                return true;
+            }
             int root = root(row, col);
-            return root < n;
+            int prow = root / n;
+            int pcol = root - prow * n;
+            return this.grid[prow][pcol] == connectedToTop;
         }
         return false;
     }
@@ -110,7 +142,7 @@ public class Percolation {
         }
 
         int row = n - 1;
-        for (int col = n * row; col < n; col++) {
+        for (int col = 0; col < n; col++) {
             if (isFull(row, col)) {
                 isPercolated = true;
                 return true;
@@ -120,7 +152,38 @@ public class Percolation {
         return false;
     }
 
-    public static void main(String[] args) {
+    public void printGrid() {
+        String ANSI_RESET = "\u001B[0m";
+        String ANSI_BLUE = "\u001B[34m";
+        for (int i = 0; i < this.grid.length; i++) {
+            for (int j = 0; j < this.grid[i].length; j++) {
+                if (getSiteInitValue(i, j) != this.grid[i][j]) {
+                    System.out.printf(ANSI_BLUE + "%4d" + ANSI_RESET, this.grid[i][j]);
+                }
+                else {
+                    System.out.printf("%4d", this.grid[i][j]);
+                }
+            }
+            System.out.println();
+        }
+    }
 
+    public void printRoots() {
+        String ANSI_RESET = "\u001B[0m";
+        String ANSI_BLUE = "\u001B[34m";
+        for (int i = 0; i < this.grid.length; i++) {
+            for (int j = 0; j < this.grid[i].length; j++) {
+                if (getSiteInitValue(i, j) != this.grid[i][j]) {
+                    System.out.printf(ANSI_BLUE + "%4d" + ANSI_RESET, root(i, j));
+                }
+                else {
+                    System.out.printf("%4d", this.grid[i][j]);
+                }
+            }
+            System.out.println();
+        }
+    }
+
+    public static void main(String[] args) {
     }
 }

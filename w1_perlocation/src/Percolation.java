@@ -82,24 +82,26 @@ public class Percolation {
             return;
         }
 
-        int rootF = root(fRow, fCol);
-        int rootS = root(sRow, sCol);
-        this.weightedUF.union(firstNumber, secondNumber);
-
         int fVal = this.grid[fRow][fCol];
         int sVal = this.grid[sRow][sCol];
 
-        if (fVal == CONNECTED_TO_TOP || sVal == CONNECTED_TO_TOP || rootF == CONNECTED_TO_TOP
-                || rootS == CONNECTED_TO_TOP) {
+        int rootF = root(fRow, fCol);
+        int fRootRow = rootF / n;
+        int fRootCol = rootF - fRootRow * n;
+        int rootFValue = this.grid[fRootRow][fRootCol];
+
+        int rootS = root(sRow, sCol);
+        int sRootRow = rootS / n;
+        int sRootCol = rootS - sRootRow * n;
+        int rootSValue = this.grid[sRootRow][sRootCol];
+
+        this.weightedUF.union(firstNumber, secondNumber);
+
+        if (fVal == CONNECTED_TO_TOP || sVal == CONNECTED_TO_TOP || rootFValue == CONNECTED_TO_TOP
+                || rootSValue == CONNECTED_TO_TOP) {
             this.grid[fRow][fCol] = CONNECTED_TO_TOP;
             this.grid[sRow][sCol] = CONNECTED_TO_TOP;
-
-            int fRootRow = rootF / n;
-            int fRootCol = rootF - fRootRow * n;
             this.grid[fRootRow][fRootCol] = CONNECTED_TO_TOP;
-
-            int sRootRow = rootS / n;
-            int sRootCol = rootS - sRootRow * n;
             this.grid[sRootRow][sRootCol] = CONNECTED_TO_TOP;
         }
     }
@@ -215,7 +217,7 @@ public class Percolation {
         for (int t = 0; t < trials; t++) {
             System.out.println("----------------");
             Percolation p = new Percolation(enteredN);
-            while (!p.percolates()) {
+            while (p.openSites <= 230) {
                 int row = StdRandom.uniformInt(1, enteredN + 1);
                 int col = StdRandom.uniformInt(1, enteredN + 1);
                 p.open(row, col);

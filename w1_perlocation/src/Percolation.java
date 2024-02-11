@@ -1,3 +1,4 @@
+import edu.princeton.cs.algs4.StdRandom;
 import edu.princeton.cs.algs4.WeightedQuickUnionUF;
 
 public class Percolation {
@@ -80,18 +81,26 @@ public class Percolation {
         if (firstNumber == NOT_SUITABLE || secondNumber == NOT_SUITABLE) {
             return;
         }
+
+        int rootF = root(fRow, fCol);
+        int rootS = root(sRow, sCol);
         this.weightedUF.union(firstNumber, secondNumber);
 
         int fVal = this.grid[fRow][fCol];
         int sVal = this.grid[sRow][sCol];
 
-        if (fVal == CONNECTED_TO_TOP || sVal == CONNECTED_TO_TOP) {
+        if (fVal == CONNECTED_TO_TOP || sVal == CONNECTED_TO_TOP || rootF == CONNECTED_TO_TOP
+                || rootS == CONNECTED_TO_TOP) {
             this.grid[fRow][fCol] = CONNECTED_TO_TOP;
             this.grid[sRow][sCol] = CONNECTED_TO_TOP;
-            int newRoot = root(fRow, fCol);
-            int rootrow = newRoot / n;
-            int rootcol = newRoot - rootrow * n;
-            this.grid[rootrow][rootcol] = CONNECTED_TO_TOP;
+
+            int fRootRow = rootF / n;
+            int fRootCol = rootF - fRootRow * n;
+            this.grid[fRootRow][fRootCol] = CONNECTED_TO_TOP;
+
+            int sRootRow = rootS / n;
+            int sRootCol = rootS - sRootRow * n;
+            this.grid[sRootRow][sRootCol] = CONNECTED_TO_TOP;
         }
     }
 
@@ -166,9 +175,13 @@ public class Percolation {
     public void printGrid() {
         String ANSI_RESET = "\u001B[0m";
         String ANSI_BLUE = "\u001B[34m";
+        String ANSI_RED = "\u001B[31m";
         for (int i = 0; i < this.grid.length; i++) {
             for (int j = 0; j < this.grid[i].length; j++) {
-                if (getSiteInitValue(i, j) != this.grid[i][j]) {
+                if (checkFull(i, j)) {
+                    System.out.printf(ANSI_RED + "%4d" + ANSI_RESET, this.grid[i][j]);
+                }
+                else if (this.grid[i][j] == OPEN_VALUE) {
                     System.out.printf(ANSI_BLUE + "%4d" + ANSI_RESET, this.grid[i][j]);
                 }
                 else {
@@ -196,5 +209,19 @@ public class Percolation {
     }
 
     public static void main(String[] args) {
+        int enteredN = 20;
+        int trials = 10;
+
+        for (int t = 0; t < trials; t++) {
+            System.out.println("----------------");
+            Percolation p = new Percolation(enteredN);
+            while (!p.percolates()) {
+                int row = StdRandom.uniformInt(1, enteredN + 1);
+                int col = StdRandom.uniformInt(1, enteredN + 1);
+                p.open(row, col);
+            }
+            p.printGrid();
+            System.out.println();
+        }
     }
 }

@@ -1,16 +1,40 @@
-import java.util.stream.IntStream;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 public class Percolation {
+    class Point {
+        private final int row;
+        private final int col;
+        private final int rootVal;
+
+        public Point(int row, int col, int val) {
+            this.row = row;
+            this.col = col;
+            this.rootVal = val;
+        }
+
+        public int getRow() {
+            return row;
+        }
+
+        public int getCol() {
+            return col;
+        }
+
+        public int getRootVal() {
+            return rootVal;
+        }
+    }
+
     private final int n;
     private final int[][] grid;
-    private final int TOP_ROOT = -1;
-    private final int SINGLE_SITE = -2;
-    private final int NOT_SUITABLE = -3;
+    private final int topRootValue = -1;
+    private final int singleSiteValue = -2;
+    private final int notSuitableValue = -3;
     private int openSites = 0;
     private boolean isPercolated = false;
-
-    // TODO: treesConnectToBttom: store roots, if root added - remove
-    // TODO Trees weight
+    private List<Integer> connectedToBot = new ArrayList<>();
 
     public Percolation(int n) {
         if (n <= 0) {
@@ -66,7 +90,7 @@ public class Percolation {
             }
         }
 
-        return prev && val < TOP_ROOT ? prevNonNgegativeVal : val;
+        return prev && val < topRootValue ? prevNonNgegativeVal : val;
     }
 
     public boolean isOpen(int row, int col) {
@@ -74,21 +98,27 @@ public class Percolation {
         return this.grid[row][col] != getSiteInitValue(row, col);
     }
 
-    private int getNeighbour(int row, int col) {
+    private Point getNeighbour(int row, int col) {
         try {
             validateIndexes(row, col);
             if (!isOpen(row, col)) {
-                return NOT_SUITABLE;
+                return null;
             }
-            return this.grid[row][col];
+            // TODO: Optimise
+            int val = root(row, col);
+            return new Point(row, col, val);
         }
         catch (IllegalArgumentException e) {
-            return NOT_SUITABLE;
+            return null;
         }
     }
 
-    private int getMin(int... vals) {
-        int newRoot = IntStream.of(vals).filter(num -> num >= TOP_ROOT).min().orElse(SINGLE_SITE);
+    private Point getMin(Point... vals) {
+        Point newRoot = Arrays.stream(vals)
+                              .filter(num -> num != null && num.rootVal >= topRootValue)
+                              .min(
+                                      (point, t1) -> Integer.compare(point.rootVal, t1.rootVal))
+                              .orElse(null);
         return newRoot;
     }
 
@@ -98,17 +128,18 @@ public class Percolation {
         }
 
         this.grid[row][col] = rootVal;
-        if (row == this.n - 1 && rootVal == TOP_ROOT) {
-            this.isPercolated = true;
-        }
     }
 
-    private void updateNeighbour(int row, int col, int validNeighbourValue, int rootToSet) {
-        if (validNeighbourValue == NOT_SUITABLE) {
+    private void updateNeighbour(int row, int col, Point neighbour, int rootToSet) {
+        if (neighbour == null) {
             return;
         }
 
-        int val = validNeighbourValue;
+        if (neighbour.rootVal == rootToSet) {
+            return;
+        }
+
+        int val = this.grid[row][col];
         setValue(row, col, rootToSet);
         while (val >= 0) {
             int parentRow = val / n;
@@ -134,34 +165,52 @@ public class Percolation {
         }
 
         openSites++;
+        boolean lastRow = row == this.n - 1;
+        int selectedRoot;
         if (row == 0) { // TODO: refactor
-            setValue(row, col, TOP_ROOT);
+            selectedRoot = topRootValue;
+            setValue(row, col, selectedRoot);
             if (!isOpen(row + 1, col)) {
                 return;
             }
-            int b = getNeighbour(row + 1, col);
-            updateNeighbour(row + 1, col, b, TOP_ROOT);
-            return;
+            Point b = getNeighbour(row + 1, col);
+            if (b != null) {
+                updateNeighbour(row + 1, col, b, selectedRoot);
+            }
+        }
+        else {
+            Point t = getNeighbour(row - 1, col);
+            Point b = getNeighbour(row + 1, col);
+            Point l = getNeighbour(row, col - 1);
+            Point r = getNeighbour(row, col + 1);
+            Point newRoot = getMin(t, b, l, r);
+            if (newRoot == null) {
+                selectedRoot = singleSiteValue;
+            }
+            else {
+                selectedRoot = newRoot.rootVal;
+            }
+
+            setValue(row, col, selectedRoot);
+            int nVal = selectedRoot == singleSiteValue ? selfVal : selectedRoot;
+            updateNeighbour(row - 1, col, t, nVal);
+            updateNeighbour(row + 1, col, b, nVal);
+            updateNeighbour(row, col - 1, l, nVal);
+            updateNeighbour(row, col + 1, r, nVal);
         }
 
-        int t = getNeighbour(row - 1, col);
-        int b = getNeighbour(row + 1, col);
-        int l = getNeighbour(row, col - 1);
-        int r = getNeighbour(row, col + 1);
-        int selectedRoot = getMin(t, b, l, r);
-        setValue(row, col, selectedRoot);
-
-        int neigbourRoot = selectedRoot != SINGLE_SITE ? selectedRoot : selfVal;
-        updateNeighbour(row - 1, col, t, neigbourRoot);
-        updateNeighbour(row + 1, col, b, neigbourRoot);
-        updateNeighbour(row, col - 1, l, neigbourRoot);
-        updateNeighbour(row, col + 1, r, neigbourRoot);
+        if (lastRow) {
+            connectedToBot.add(selfVal);
+            if (selectedRoot == topRootValue) {
+                isPercolated = true;
+            }
+        }
     }
 
     public boolean isFull(int row, int col) {
         this.validateIndexes(row, col);
         int root = root(row, col);
-        return root == TOP_ROOT;
+        return root == topRootValue;
     }
 
     public int numberOfOpenSites() {
@@ -169,7 +218,21 @@ public class Percolation {
     }
 
     public boolean percolates() {
-        return this.isPercolated;
+        if (isPercolated) {
+            return true;
+        }
+
+        for (int el : connectedToBot) {
+            int row = el / n;
+            int column = el - row * n;
+            int rootVal = root(row, column);
+            if (rootVal == topRootValue) {
+                isPercolated = true;
+                break;
+            }
+        }
+
+        return isPercolated;
     }
 
     public void printGrid() {
@@ -189,70 +252,6 @@ public class Percolation {
     }
 
     public static void main(String[] args) {
-        int enteredN = 5;
 
-        Percolation p = new Percolation(enteredN);
-        p.open(3, 4);
-        p.printGrid();
-        System.out.println();
-        p.open(2, 4);
-        p.printGrid();
-        System.out.println();
-        p.open(1, 4);
-        p.printGrid();
-        System.out.println();
-        p.open(2, 3);
-        p.printGrid();
-        System.out.println();
-        p.open(2, 0);
-        p.printGrid();
-        System.out.println();
-        p.open(0, 1);
-        p.printGrid();
-        System.out.println();
-        p.open(2, 2);
-        p.printGrid();
-        System.out.println();
-        p.open(1, 3);
-        p.printGrid();
-        System.out.println();
-        p.open(0, 0);
-        p.printGrid();
-        System.out.println();
-        p.open(1, 1);
-        p.printGrid();
-        System.out.println();
-        p.open(3, 2);
-        p.printGrid();
-        System.out.println();
-        p.open(4, 2);
-        p.printGrid();
-        System.out.println();
-        p.open(2, 1);
-        p.printGrid();
-        System.out.println(p.percolates());
-
-
-        // for (int h = 0; h < 1000; h++) {
-        //     Percolation p = new Percolation(enteredN);
-        //     int iteration = 1;
-        //     while (!p.percolates()) {
-        //         System.out.printf("--- ITERATION %d ---\n", iteration);
-        //         int row = StdRandom.uniformInt(enteredN);
-        //         int col = StdRandom.uniformInt(enteredN);
-        //         System.out.printf("OPEN row=%d col=%d\n", row, col);
-        //         p.open(row, col);
-        //         System.out.println("OPEN SITES: " + p.numberOfOpenSites());
-        //         p.printGrid();
-        //         iteration++;
-        //
-        //         if (!p.percolates() && p.openSites == enteredN * enteredN) {
-        //             System.out.println("STOP");
-        //             return;
-        //         }
-        //         System.out.println("--- ITERATION END ---");
-        //     }
-        //     System.out.println("Perlocates!");
-        // }
     }
 }

@@ -3,7 +3,6 @@ import edu.princeton.cs.algs4.StdRandom;
 import edu.princeton.cs.algs4.StdStats;
 
 public class PercolationStats {
-    private final int n;
     private final int trials;
     private final double[] results;
     private final int maxT;
@@ -13,13 +12,12 @@ public class PercolationStats {
             throw new IllegalArgumentException("Incorrect arguments");
         }
 
-        this.n = n;
         this.trials = trials;
         this.maxT = n * n;
         this.results = new double[trials];
     }
 
-    public void registerResult(int num, int openSites) {
+    private void registerResult(int num, int openSites) {
         results[num] = (double) openSites / maxT;
     }
 

@@ -2,8 +2,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-public class Percolation {
-    private class Point {
+public class PercolationPavel {
+    class Point {
         private final int row;
         private final int col;
         private final int rootVal;
@@ -36,7 +36,7 @@ public class Percolation {
     private boolean isPercolated = false;
     private List<Integer> connectedToBot = new ArrayList<>();
 
-    public Percolation(int n) {
+    public PercolationPavel(int n) {
         if (n <= 0) {
             throw new IllegalArgumentException("Provided 'n' has to be more or equal to 1");
         }
@@ -233,6 +233,22 @@ public class Percolation {
         }
 
         return isPercolated;
+    }
+
+    public void printGrid() {
+        String ANSI_RESET = "\u001B[0m";
+        String ANSI_BLUE = "\u001B[34m";
+        for (int i = 0; i < this.grid.length; i++) {
+            for (int j = 0; j < this.grid[i].length; j++) {
+                if (getSiteInitValue(i, j) != this.grid[i][j]) {
+                    System.out.printf(ANSI_BLUE + "%4d" + ANSI_RESET, this.grid[i][j]);
+                }
+                else {
+                    System.out.printf("%4d", this.grid[i][j]);
+                }
+            }
+            System.out.println();
+        }
     }
 
     public static void main(String[] args) {

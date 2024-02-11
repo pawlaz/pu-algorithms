@@ -47,16 +47,20 @@ public class Percolation {
         return weightedUF.find(getSiteInitValue(row, col));
     }
 
-    public boolean isOpen(int row, int col) {
+    private boolean checkOpen(int row, int col) {
         this.validateIndexes(row, col);
         int val = this.grid[row][col];
         return val == OPEN_VALUE || val == CONNECTED_TO_TOP;
     }
 
+    public boolean isOpen(int row, int col) {
+        return checkOpen(row - 1, col - 1);
+    }
+
     private int getNeighbour(int row, int col) {
         try {
             validateIndexes(row, col);
-            if (!isOpen(row, col)) {
+            if (!checkOpen(row, col)) {
                 return NOT_SUITABLE;
             }
             return getSiteInitValue(row, col);
@@ -92,6 +96,9 @@ public class Percolation {
     }
 
     public void open(int row, int col) {
+        row = row - 1;
+        col = col - 1;
+
         this.validateIndexes(row, col);
         int val = this.grid[row][col];
         int selfVal = getSiteInitValue(row, col);
@@ -118,9 +125,9 @@ public class Percolation {
         linkElems(selfVal, row, col, right, row, col + 1);
     }
 
-    public boolean isFull(int row, int col) {
+    public boolean checkFull(int row, int col) {
         this.validateIndexes(row, col);
-        if (isOpen(row, col)) {
+        if (checkOpen(row, col)) {
             if (this.grid[row][col] == CONNECTED_TO_TOP) {
                 return true;
             }
@@ -130,6 +137,10 @@ public class Percolation {
             return this.grid[prow][pcol] == CONNECTED_TO_TOP;
         }
         return false;
+    }
+
+    public boolean isFull(int row, int col) {
+        return checkFull(row - 1, col - 1);
     }
 
     public int numberOfOpenSites() {
@@ -143,7 +154,7 @@ public class Percolation {
 
         int row = n - 1;
         for (int col = 0; col < n; col++) {
-            if (isFull(row, col)) {
+            if (checkFull(row, col)) {
                 isPercolated = true;
                 return true;
             }

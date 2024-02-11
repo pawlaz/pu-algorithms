@@ -62,8 +62,8 @@ public class PercolationStats {
         for (int t = 0; t < trials; t++) {
             Percolation p = new Percolation(enteredN);
             while (!p.percolates()) {
-                int row = StdRandom.uniformInt(enteredN);
-                int col = StdRandom.uniformInt(enteredN);
+                int row = StdRandom.uniformInt(1, enteredN + 1);
+                int col = StdRandom.uniformInt(1, enteredN + 1);
                 p.open(row, col);
             }
             pstats.registerResult(t, p.numberOfOpenSites());

@@ -10,7 +10,6 @@ public class RandomizedQueue<Item> implements Iterable<Item> {
 
     public RandomizedQueue() {
         queue = (Item[]) new Object[2];
-
     }
 
     public boolean isEmpty() {
@@ -117,11 +116,11 @@ public class RandomizedQueue<Item> implements Iterable<Item> {
         r.enqueue(4);
         r.enqueue(5);
 
-        System.out.printf("Dequeue 1: %d%n", r.dequeue());
-        System.out.printf("Dequeue 2: %d%n", r.dequeue());
-        System.out.printf("Sample: %d%n", r.sample());
-        System.out.printf("isEmpty: %b%n", r.isEmpty());
-        System.out.printf("Size: %d%n", r.size());
+        StdOut.printf("Dequeue 1: %d%n", r.dequeue());
+        StdOut.printf("Dequeue 2: %d%n", r.dequeue());
+        StdOut.printf("Sample: %d%n", r.sample());
+        StdOut.printf("isEmpty: %b%n", r.isEmpty());
+        StdOut.printf("Size: %d%n", r.size());
 
         for (Integer i : r) {
             StdOut.print(i + " ");

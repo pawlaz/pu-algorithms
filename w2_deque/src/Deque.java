@@ -167,7 +167,8 @@ public class Deque<Item> implements Iterable<Item> {
         for (Integer i : d) {
             StdOut.print(i + " ");
         }
-        StdOut.println();
+        StdOut.println("\r\n " + d.size());
+        StdOut.println(d.isEmpty());
         StdOut.println(d.removeFirst());
         StdOut.println(d.removeLast());
         for (Integer i : d) {

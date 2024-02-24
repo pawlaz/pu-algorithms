@@ -53,7 +53,7 @@ public class Point implements Comparable<Point> {
             return +0.0;
         }
 
-        return (double) (that.y - this.y) / (that.x - this.y);
+        return (double) (that.y - this.y) / (that.x - this.x);
     }
 
     /**
@@ -82,6 +82,14 @@ public class Point implements Comparable<Point> {
                 "x=" + x +
                 ", y=" + y +
                 '}';
+    }
+
+    public int getX() {
+        return x;
+    }
+
+    public int getY() {
+        return y;
     }
 
     // Do not override the equals() or hashCode() methods :(

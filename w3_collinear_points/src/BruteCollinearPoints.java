@@ -70,7 +70,7 @@ public class BruteCollinearPoints {
         return this.numberOfSegments;
     }
 
-    private LineSegment[] segments() {
+    public LineSegment[] segments() {
         LineSegment[] shrinkedArray = new LineSegment[this.numberOfSegments];
         for (int i = 0; i < numberOfSegments; i++) {
             shrinkedArray[i] = this.lineSegments[i];
@@ -79,7 +79,7 @@ public class BruteCollinearPoints {
     }
 
     // The method segments() should include each line segment containing 4 points exactly once
-    public void calculateSegments(final Point[] points) {
+    private void calculateSegments(final Point[] points) {
         if (points.length < 4) {
             this.lineSegments = new LineSegment[0];
             return;

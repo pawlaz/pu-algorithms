@@ -2,7 +2,6 @@ import java.util.Arrays;
 
 public class BruteCollinearPoints {
     private static final Point ZERO = new Point(0, 0);
-    private Point[] points;
     private LineSegment[] lineSegments = new LineSegment[0];
     private int numberOfSegments = 0;
 
@@ -12,20 +11,22 @@ public class BruteCollinearPoints {
             throw new IllegalArgumentException("Points array is empty");
         }
 
-        this.points = new Point[points.length];
+        Point[] pCopy = new Point[points.length];
         for (int i = 0; i < points.length; i++) {
             if (points[i] == null) {
                 throw new IllegalArgumentException("Point can't be null");
             }
-            this.points[i] = points[i];
+            pCopy[i] = points[i];
         }
 
-        Arrays.sort(this.points);
+        Arrays.sort(pCopy);
         for (int i = 0; i < points.length; i++) {
-            if (i < points.length - 1 && points[i].compareTo(points[i + 1]) == 0) {
-                throw new IllegalArgumentException("Duplicated point: " + points[i]);
+            if (i < pCopy.length - 1 && pCopy[i].compareTo(pCopy[i + 1]) == 0) {
+                throw new IllegalArgumentException("Duplicated point: " + pCopy[i]);
             }
         }
+
+        calculateSegments(pCopy);
     }
 
     private LineSegment collinearLineSegment(final Point... pointsGroup) {
@@ -69,7 +70,7 @@ public class BruteCollinearPoints {
         return this.numberOfSegments;
     }
 
-    private LineSegment[] shrinkResult() {
+    private LineSegment[] segments() {
         LineSegment[] shrinkedArray = new LineSegment[this.numberOfSegments];
         for (int i = 0; i < numberOfSegments; i++) {
             shrinkedArray[i] = this.lineSegments[i];
@@ -78,24 +79,21 @@ public class BruteCollinearPoints {
     }
 
     // The method segments() should include each line segment containing 4 points exactly once
-    public LineSegment[] segments() {
-        if (this.points.length < 4) {
-            return new LineSegment[0];
+    public void calculateSegments(final Point[] points) {
+        if (points.length < 4) {
+            this.lineSegments = new LineSegment[0];
+            return;
         }
 
-        if (this.lineSegments.length != 0) {
-            return shrinkResult();
-        }
-
-        this.lineSegments = new LineSegment[this.points.length * 2];
-        for (int i = 0; i < this.points.length - 3; i++) {
-            for (int j = i + 1; j < this.points.length - 2; j++) {
-                for (int k = j + 1; k < this.points.length - 1; k++) {
-                    for (int l = k + 1; l < this.points.length; l++) {
-                        Point p1 = this.points[i];
-                        Point p2 = this.points[j];
-                        Point p3 = this.points[k];
-                        Point p4 = this.points[l];
+        this.lineSegments = new LineSegment[points.length * 2];
+        for (int i = 0; i < points.length - 3; i++) {
+            for (int j = i + 1; j < points.length - 2; j++) {
+                for (int k = j + 1; k < points.length - 1; k++) {
+                    for (int m = k + 1; m < points.length; m++) {
+                        Point p1 = points[i];
+                        Point p2 = points[j];
+                        Point p3 = points[k];
+                        Point p4 = points[m];
 
                         LineSegment segment = collinearLineSegment(p1, p2, p3, p4);
                         if (segment != null) {
@@ -105,7 +103,6 @@ public class BruteCollinearPoints {
                 }
             }
         }
-        return shrinkResult();
     }
 
     public static void main(String[] args) {

@@ -13,17 +13,18 @@ public class BruteCollinearPoints {
         }
 
         Arrays.sort(points);
-        for (int i = 0; i < points.length - 1; i++) {
+        this.originalPoints = new Point[points.length];
+        for (int i = 0; i < points.length; i++) {
             if (points[i] == null) {
                 throw new IllegalArgumentException("Point can't be null");
             }
 
-            if (points[i].compareTo(points[i + 1]) == 0) {
+            this.originalPoints[i] = points[i];
+
+            if (i < points.length - 1 && points[i].compareTo(points[i + 1]) == 0) {
                 throw new IllegalArgumentException("Duplicated point: " + points[i]);
             }
         }
-
-        this.originalPoints = points;
     }
 
     private LineSegment collinearLineSegment(final Point... points) {

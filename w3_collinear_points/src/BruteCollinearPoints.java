@@ -54,8 +54,18 @@ public class BruteCollinearPoints {
 
     private LineSegment collinearLineSegment(final Point... points) {
         Arrays.sort(points, ZERO.slopeOrder());
-        int minX = Math.min(points[0].getX(), points[points.length - 1].getX());
-        int maxX = Math.max(points[0].getX(), points[points.length - 1].getX());
+
+        Point min;
+        Point max;
+
+        if (points[0].compareTo(points[points.length - 1]) < 0) {
+            min = points[0];
+            max = points[points.length - 1];
+        }
+        else {
+            min = points[points.length - 1];
+            max = points[0];
+        }
 
         double prevSlope = Double.NEGATIVE_INFINITY; // just to avoid null and wrapping
         for (int i = 0; i < points.length - 1; i++) {
@@ -67,7 +77,7 @@ public class BruteCollinearPoints {
                 throw new IllegalArgumentException("Duplicated point " + p1.toString());
             }
 
-            boolean isCurve = !(p2.getX() >= minX && p2.getX() <= maxX);
+            boolean isCurve = !(p2.compareTo(min) >= 0 && p2.compareTo(max) <= 0);
 
             // not ascending order (remove duplicates) / no line segment
             if (isCurve || (prevSlope != Double.NEGATIVE_INFINITY

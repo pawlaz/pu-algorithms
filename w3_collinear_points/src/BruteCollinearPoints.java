@@ -7,7 +7,7 @@ public class BruteCollinearPoints {
 
     // For simplicity, we will not supply any input to BruteCollinearPoints that has 5 or more collinear points.
     public BruteCollinearPoints(final Point[] points) {
-        this.lineSegments = new LineSegment[points.length]; // ArrayList is forbidden
+        this.lineSegments = new LineSegment[points.length * 2]; // ArrayList is forbidden
         this.numberOfSegments = 0;
         calculateSegments(points);
     }

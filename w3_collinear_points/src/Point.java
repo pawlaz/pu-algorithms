@@ -115,10 +115,6 @@ public class Point implements Comparable<Point> {
      */
     public Comparator<Point> slopeOrder() {
         return (p1, p2) -> {
-            if (p1 == null || p2 == null) {
-                throw new IllegalArgumentException("Point can't be null");
-            }
-
             double slope1 = slopeTo(p1);
             double slope2 = slopeTo(p2);
 

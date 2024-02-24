@@ -11,29 +11,55 @@ import edu.princeton.cs.algs4.StdOut;
 import java.util.Arrays;
 
 public class FastCollinearPoints {
-    private LineSegment[] lineSegments;
-    private int numberOfSegments;
+    private Point[] originalPoints;
+    private LineSegment[] lineSegments = new LineSegment[0];
+    private int numberOfSegments = 0;
 
     // should work properly even if the input has 5 or more collinear points
     public FastCollinearPoints(final Point[] points) {
-        this.numberOfSegments = 0;
-        this.lineSegments = new LineSegment[points.length * 2];
-        calculateSegments(points);
+        if (points == null) {
+            throw new IllegalArgumentException("Points array is empty");
+        }
+
+        Arrays.sort(points);
+        for (int i = 0; i < points.length - 1; i++) {
+            if (points[i] == null) {
+                throw new IllegalArgumentException("Point can't be null");
+            }
+
+            if (points[i].compareTo(points[i + 1]) == 0) {
+                throw new IllegalArgumentException("Duplicated point: " + points[i]);
+            }
+        }
+
+        this.originalPoints = points;
     }
 
-    private void calculateSegments(final Point[] points) {
-        // TODO: corner cases
-        for (int i = 0; i < points.length; i++) {
-            Point p = points[i];
-            Arrays.sort(points, p.slopeOrder());
+    public int numberOfSegments() {
+        return this.numberOfSegments;
+    }
+
+    // The method segments() should include each line segment containing 4 points exactly once
+    public LineSegment[] segments() {
+        if (this.originalPoints.length < 4) {
+            return new LineSegment[0];
+        }
+
+        if (this.lineSegments.length == 0) {
+            this.lineSegments = new LineSegment[this.originalPoints.length * 2];
+        }
+
+        for (int i = 0; i < this.originalPoints.length; i++) {
+            Point p = this.originalPoints[i];
+            Arrays.sort(this.originalPoints, p.slopeOrder());
 
             int duplicates = -1;
             int count = 0;
             Point min = p;
             Point max = p;
             double initSlope = Double.NEGATIVE_INFINITY;
-            for (int j = 1; j < points.length; j++) { // TODO more than 5
-                double slope = p.slopeTo(points[j]);
+            for (int j = 1; j < this.originalPoints.length; j++) { // TODO more than 5
+                double slope = p.slopeTo(this.originalPoints[j]);
                 if (Double.compare(initSlope, Double.NEGATIVE_INFINITY) == 0) {
                     initSlope = slope;
                 }
@@ -51,11 +77,11 @@ public class FastCollinearPoints {
                     max = p;
                 }
                 else {
-                    if (min.compareTo(points[j]) > 0) {
-                        min = points[j];
+                    if (min.compareTo(this.originalPoints[j]) > 0) {
+                        min = this.originalPoints[j];
                     }
-                    else if (max.compareTo(points[j]) < 0) {
-                        max = points[j];
+                    else if (max.compareTo(this.originalPoints[j]) < 0) {
+                        max = this.originalPoints[j];
                     }
                     count++;
                 }
@@ -69,16 +95,7 @@ public class FastCollinearPoints {
         for (int i = 0; i < numberOfSegments; i++) {
             shrinkedArray[i] = this.lineSegments[i];
         }
-        this.lineSegments = shrinkedArray;
-    }
-
-    public int numberOfSegments() {
-        return this.numberOfSegments;
-    }
-
-    // The method segments() should include each line segment containing 4 points exactly once
-    public LineSegment[] segments() {
-        return this.lineSegments;
+        return shrinkedArray;
     }
 
     public static void main(String[] args) {

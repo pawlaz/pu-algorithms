@@ -50,10 +50,6 @@ public class BruteCollinearPoints {
             Point p2 = pointsGroup[i + 1];
             double slope = p1.slopeTo(p2);
 
-            if (slope == Double.NEGATIVE_INFINITY) {
-                throw new IllegalArgumentException("Duplicated point " + p1.toString());
-            }
-
             boolean isCurve = !(p2.compareTo(min) >= 0 && p2.compareTo(max) <= 0);
 
             // not ascending order (remove duplicates) / no line segment

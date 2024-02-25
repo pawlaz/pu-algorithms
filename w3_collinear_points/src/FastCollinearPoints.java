@@ -51,12 +51,12 @@ public class FastCollinearPoints {
             return;
         }
 
+        // TODO: shrink after calculation
         this.lineSegments = new LineSegment[points.length * 2];
         for (int i = 0; i < points.length; i++) {
             Point p = points[i];
             Arrays.sort(points, p.slopeOrder());
 
-            int duplicates = -1;
             int count = 0;
             Point min = p;
             Point max = p;
@@ -65,9 +65,6 @@ public class FastCollinearPoints {
                 double slope = p.slopeTo(points[j]);
                 if (Double.compare(initSlope, Double.NEGATIVE_INFINITY) == 0) {
                     initSlope = slope;
-                }
-                if (Double.compare(slope, Double.NEGATIVE_INFINITY) == 0 && ++duplicates > 0) {
-                    throw new IllegalArgumentException();
                 }
 
                 if (Double.compare(initSlope, slope) != 0) {

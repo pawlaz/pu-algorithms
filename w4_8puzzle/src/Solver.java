@@ -22,42 +22,43 @@ public class Solver {
         MinPQ<Board> minPQ = new MinPQ<Board>(this::prioritiesCompare);
         minPQ.insert(initialBoard);
 
+        Board twin = initialBoard.twin();
         MinPQ<Board> twinMinPQ = new MinPQ<Board>(this::prioritiesCompare);
-        twinMinPQ.insert(initialBoard.twin());
+        twinMinPQ.insert(twin);
 
         Queue<Board> currentSolution = new Queue<>();
 
-        Board minBoard = null;
-        Board twinMinBoard = null;
+        Board solutionBoard = null;
+        Board twinSolutionBoard = null;
         Board prevBoard = null;
         Board twinPrevBoard = null;
         do {
             this.moves++;
-            if (minBoard != null) {
-                prevBoard = minBoard;
+            if (solutionBoard != null) {
+                prevBoard = solutionBoard;
             }
-            minBoard = minPQ.delMin();
-            for (Board bn : minBoard.neighbors()) {
+            solutionBoard = minPQ.delMin();
+            for (Board bn : solutionBoard.neighbors()) {
                 if (prevBoard != null && prevBoard.equals(bn)) {
                     continue;
                 }
                 minPQ.insert(bn);
             }
-            currentSolution.enqueue(minBoard);
+            currentSolution.enqueue(solutionBoard);
 
-            if (twinMinBoard != null) {
-                twinPrevBoard = twinMinBoard;
+            if (twinSolutionBoard != null) {
+                twinPrevBoard = twinSolutionBoard;
             }
-            twinMinBoard = twinMinPQ.delMin();
-            for (Board bn : twinMinBoard.neighbors()) {
+            twinSolutionBoard = twinMinPQ.delMin();
+            for (Board bn : twinSolutionBoard.neighbors()) {
                 if (twinPrevBoard != null && twinPrevBoard.equals(bn)) {
                     continue;
                 }
                 twinMinPQ.insert(bn);
             }
-        } while (!minBoard.isGoal() && !twinMinBoard.isGoal());
+        } while (!solutionBoard.isGoal() && !twinSolutionBoard.isGoal());
 
-        if (minBoard.isGoal()) {
+        if (solutionBoard.isGoal()) {
             return currentSolution;
         }
 
@@ -81,7 +82,6 @@ public class Solver {
     }
 
     public static void main(String[] args) {
-        // create initial board from file
         In in = new In(args[0]);
         int n = in.readInt();
         int[][] tiles = new int[n][n];

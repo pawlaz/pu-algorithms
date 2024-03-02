@@ -25,17 +25,32 @@ public class Board {
         int zeros = 0;
         int zeroRow = 0;
         int zeroCol = 0;
+        int hammingValue = 0;
+        int manhattanValue = 0;
         for (int i = 0; i < n; i++) {
             if (tiles[i].length != n) {
                 throw new IllegalArgumentException("Not n-by-n board provided");
             }
             for (int j = 0; j < n; j++) {
-                this.tiles[i][j] = tiles[i][j];
-                if (this.tiles[i][j] == BLANK_VALUE) {
+                int tileValue = tiles[i][j];
+                this.tiles[i][j] = tileValue;
+
+                if (tileValue == BLANK_VALUE) {
                     zeroRow = i;
                     zeroCol = j;
                     zeros++;
+                    continue;
                 }
+
+                if (tileValue != i * n + j + 1) {
+                    hammingValue++;
+                }
+
+                tileValue -= 1;
+                int expectedRow = tileValue / n;
+                int expectedCol = tileValue - expectedRow * n;
+                manhattanValue += Math.abs(i - expectedRow) + Math.abs(j - expectedCol);
+
             }
         }
 
@@ -45,8 +60,8 @@ public class Board {
 
         blankRow = zeroRow;
         blankCol = zeroCol;
-        hammingDistance = calcHamming();
-        manhattanDistance = calcManhattan();
+        hammingDistance = hammingValue;
+        manhattanDistance = manhattanValue;
     }
 
     public String toString() {
@@ -66,39 +81,6 @@ public class Board {
 
     public int dimension() {
         return n;
-    }
-
-    private int calcHamming() {
-        int distance = 0;
-        for (int i = 0; i < n; i++) {
-            for (int j = 0; j < n; j++) {
-                if (i == n - 1 && j == n - 1) {
-                    continue;
-                }
-                if (tiles[i][j] != i * n + j + 1) {
-                    distance++;
-                }
-            }
-        }
-        return distance;
-    }
-
-    private int calcManhattan() {
-        int distance = 0;
-        for (int i = 0; i < n; i++) {
-            for (int j = 0; j < n; j++) {
-                int current = tiles[i][j];
-                if (i == n - 1 && j == n - 1) {
-                    continue;
-                }
-                if (current != i * n + j + 1) {
-                    int expectedRow = (current - 1) / n;
-                    int expectedCol = (current - 1) - expectedRow * n;
-                    distance += Math.abs(i - expectedRow) + Math.abs(j - expectedCol);
-                }
-            }
-        }
-        return distance;
     }
 
     public int hamming() {

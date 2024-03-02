@@ -1,5 +1,4 @@
 import edu.princeton.cs.algs4.Queue;
-import edu.princeton.cs.algs4.StdRandom;
 
 import java.util.Arrays;
 
@@ -140,20 +139,12 @@ public class Board {
         return neighbors;
     }
 
-    // a board that is obtained by exchanging any pair of tiles
     public Board twin() {
-        while (true) {
-            int row1 = StdRandom.uniformInt(0, n);
-            int row2 = StdRandom.uniformInt(0, n);
-            int col1 = StdRandom.uniformInt(0, n);
-            int col2 = StdRandom.uniformInt(0, n);
-
-            boolean isFristEqualsToZero = tiles[row1][col1] == BLANK_VALUE;
-            boolean isSecondEqualsToZero = tiles[row2][col2] == BLANK_VALUE;
-            if (row1 != row2 && col1 != col2 && !isFristEqualsToZero && !isSecondEqualsToZero) {
-                return getCopyAndSwap(row1, col1, row2, col2);
-            }
+        if (tiles[0][0] != BLANK_VALUE && tiles[0][1] != BLANK_VALUE) {
+            return getCopyAndSwap(0, 0, 0, 1);
         }
+
+        return getCopyAndSwap(1, 0, 1, 1);
     }
 
     public static void main(String[] args) {

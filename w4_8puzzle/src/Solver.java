@@ -1,11 +1,45 @@
 import edu.princeton.cs.algs4.In;
 import edu.princeton.cs.algs4.MinPQ;
-import edu.princeton.cs.algs4.Queue;
 import edu.princeton.cs.algs4.StdOut;
 
+import java.util.Deque;
+import java.util.LinkedList;
+
 public class Solver {
-    private final Iterable<Board> solution;
-    private int moves = 0;
+    private final SearchNode solution;
+
+    private class SearchNode implements Comparable<SearchNode> {
+        private final Board board;
+        private final SearchNode prev;
+        private final int moves;
+        private final int priority;
+
+        public SearchNode(final Board board, final SearchNode prevNode) {
+            this.board = board;
+            this.prev = prevNode;
+            this.moves = prevNode == null ? 0 : prevNode.moves + 1;
+            this.priority = board.manhattan() + moves;
+        }
+
+        public boolean isGoal() {
+            return this.board.isGoal();
+        }
+
+        public void addNeighboursToQueue(final MinPQ<SearchNode> queue) {
+            for (Board neighbor : board.neighbors()) {
+                if (prev != null && neighbor.equals(prev.board)) {
+                    continue;
+                }
+
+                SearchNode node = new SearchNode(neighbor, this);
+                queue.insert(node);
+            }
+        }
+
+        public int compareTo(final SearchNode that) {
+            return this.priority - that.priority;
+        }
+    }
 
     public Solver(final Board initial) {
         if (initial == null) {
@@ -14,55 +48,28 @@ public class Solver {
         this.solution = findSolution(initial);
     }
 
-    private int prioritiesCompare(final Board b1, final Board b2) {
-        return Integer.compare(b1.manhattan() + moves, b2.manhattan() + moves);
-    }
+    private SearchNode findSolution(final Board initialBoard) {
+        MinPQ<SearchNode> solutionPQ = new MinPQ<SearchNode>();
+        solutionPQ.insert(new SearchNode(initialBoard, null));
 
-    private Iterable<Board> findSolution(final Board initialBoard) {
-        MinPQ<Board> minPQ = new MinPQ<Board>(this::prioritiesCompare);
-        minPQ.insert(initialBoard);
+        MinPQ<SearchNode> twinPQ = new MinPQ<SearchNode>();
+        twinPQ.insert(new SearchNode(initialBoard.twin(), null));
 
-        Board twin = initialBoard.twin();
-        MinPQ<Board> twinMinPQ = new MinPQ<Board>(this::prioritiesCompare);
-        twinMinPQ.insert(twin);
+        while (true) {
+            SearchNode currentNode = solutionPQ.delMin();
+            SearchNode twinNode = twinPQ.delMin();
 
-        Queue<Board> currentSolution = new Queue<>();
-
-        Board solutionBoard = null;
-        Board twinSolutionBoard = null;
-        Board prevBoard = null;
-        Board twinPrevBoard = null;
-        do {
-            this.moves++;
-            if (solutionBoard != null) {
-                prevBoard = solutionBoard;
+            if (currentNode.isGoal()) {
+                return currentNode;
             }
-            solutionBoard = minPQ.delMin();
-            for (Board bn : solutionBoard.neighbors()) {
-                if (prevBoard != null && prevBoard.equals(bn)) {
-                    continue;
-                }
-                minPQ.insert(bn);
-            }
-            currentSolution.enqueue(solutionBoard);
 
-            if (twinSolutionBoard != null) {
-                twinPrevBoard = twinSolutionBoard;
+            if (twinNode.isGoal()) {
+                return null;
             }
-            twinSolutionBoard = twinMinPQ.delMin();
-            for (Board bn : twinSolutionBoard.neighbors()) {
-                if (twinPrevBoard != null && twinPrevBoard.equals(bn)) {
-                    continue;
-                }
-                twinMinPQ.insert(bn);
-            }
-        } while (!solutionBoard.isGoal() && !twinSolutionBoard.isGoal());
 
-        if (solutionBoard.isGoal()) {
-            return currentSolution;
+            currentNode.addNeighboursToQueue(solutionPQ);
+            twinNode.addNeighboursToQueue(twinPQ);
         }
-
-        return null;
     }
 
     public boolean isSolvable() {
@@ -71,14 +78,25 @@ public class Solver {
 
     public int moves() {
         if (isSolvable()) {
-            return moves;
+            return solution.moves;
         }
 
         return -1;
     }
 
     public Iterable<Board> solution() {
-        return solution;
+        if (!isSolvable()) {
+            return null;
+        }
+
+        Deque<Board> solutionNodes = new LinkedList<>();
+        SearchNode node = solution;
+        while (node != null) {
+            solutionNodes.addFirst(node.board);
+            node = node.prev;
+        }
+
+        return solutionNodes;
     }
 
     public static void main(String[] args) {

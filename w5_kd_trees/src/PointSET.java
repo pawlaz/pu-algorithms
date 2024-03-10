@@ -2,6 +2,7 @@ import edu.princeton.cs.algs4.Point2D;
 import edu.princeton.cs.algs4.RectHV;
 
 import java.util.TreeSet;
+import java.util.stream.Collectors;
 
 public class PointSET {
     private final TreeSet<Point2D> points;
@@ -42,13 +43,21 @@ public class PointSET {
 
     public Iterable<Point2D> range(final RectHV rect) {
         validateArgs(rect);
-        return null; // TODO
-
+        return points.parallelStream().filter(rect::contains).collect(Collectors.toList());
     }
 
     public Point2D nearest(final Point2D p) {
         validateArgs(p);
-        return null; // TODO
+        Point2D nearestPoint = null;
+        double shortestDistance = 0;
+        for (Point2D point : points) {
+            double distance = p.distanceTo(point);
+            if (nearestPoint == null || Double.compare(distance, shortestDistance) < 0) {
+                nearestPoint = point;
+                shortestDistance = distance;
+            }
+        }
+        return nearestPoint;
     }
 
     public static void main(String[] args) {

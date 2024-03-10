@@ -8,8 +8,6 @@ import edu.princeton.cs.algs4.Point2D;
 import edu.princeton.cs.algs4.RectHV;
 import edu.princeton.cs.algs4.StdDraw;
 
-import java.awt.Color;
-
 public class KdTree {
     private Node root = null;
     private int size = 0;
@@ -24,13 +22,14 @@ public class KdTree {
 
     public void insert(final Point2D p) {
         validateArgs(p);
-        root = put(root, p, true);
+        root = put(root, p, true, null);
     }
 
-    private Node put(final Node node, final Point2D point, final boolean isVertical) {
+    private Node put(final Node node, final Point2D point, final boolean isVertical,
+                     final Node prev) {
         if (node == null) {
             size++;
-            return new Node(point, isVertical);
+            return new Node(point, isVertical, prev);
         }
 
         if (node.isSamePoint(point)) {
@@ -39,10 +38,10 @@ public class KdTree {
 
         int cmp = node.compareTo(point);
         if (cmp > 0) {
-            node.left = put(node.left, point, !isVertical);
+            node.left = put(node.left, point, !isVertical, node);
         }
         else if (cmp < 0) {
-            node.right = put(node.right, point, !isVertical);
+            node.right = put(node.right, point, !isVertical, node);
         }
 
         return node;
@@ -104,14 +103,39 @@ public class KdTree {
         private Node left = null;
         private Node right = null;
 
-        public Node(final Point2D point, final boolean isVertical) {
+        public Node(final Point2D point, final boolean isVertical, final Node parent) {
             this.point = point;
-            this.rect = null; // TODO
             this.isVertical = isVertical;
-        }
+            if (parent == null) {
+                // all x- or y-coordinates of points inserted into the KdTree will be between 0 and 1
+                this.rect = new RectHV(0.0, 0.0, 1.0, 1.0);
+            }
+            else {
+                double minX = parent.rect.xmin();
+                double minY = parent.rect.ymin();
+                double maxX = parent.rect.xmax();
+                double maxY = parent.rect.ymax();
 
-        public Color getColor() {
-            return isVertical ? StdDraw.RED : StdDraw.BLUE;
+                int cmp = parent.compareTo(point);
+                if (isVertical) {
+                    if (cmp > 0) {
+                        maxY = parent.point.y();
+                    }
+                    else {
+                        minY = parent.point.y();
+                    }
+                }
+                else {
+                    if (cmp > 0) {
+                        maxX = parent.point.x();
+                    }
+                    else {
+                        minX = parent.point.x();
+                    }
+                }
+
+                this.rect = new RectHV(minX, minY, maxX, maxY);
+            }
         }
 
         public boolean isSamePoint(final Point2D pointToCheck) {
@@ -128,7 +152,16 @@ public class KdTree {
         }
 
         public void draw() {
-            // TODO: draw lines
+            StdDraw.setPenRadius(0.001);
+            if (isVertical) {
+                StdDraw.setPenColor(StdDraw.RED);
+                StdDraw.line(point.x(), rect.ymin(), point.x(), rect.ymax());
+            }
+            else {
+                StdDraw.setPenColor(StdDraw.BLUE);
+                StdDraw.line(rect.xmin(), point.y(), rect.xmax(), point.y());
+            }
+
             StdDraw.setPenRadius(0.01);
             StdDraw.setPenColor(StdDraw.BLACK);
             point.draw();

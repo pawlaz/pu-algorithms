@@ -41,11 +41,10 @@ public class KdTree {
             return current;
         }
 
-        int cmp = current.compareTo(point);
-        if (cmp > 0) {
+        if (current.compareTo(point) > 0) {
             current.left = put(current.left, point, !isVertical, current);
         }
-        else if (cmp < 0) {
+        else {
             current.right = put(current.right, point, !isVertical, current);
         }
 
@@ -114,7 +113,49 @@ public class KdTree {
 
     public Point2D nearest(final Point2D p) {
         validateArgs(p);
-        return null; // TODO
+        if (isEmpty()) {
+            return null;
+        }
+        return findNearestPoint(root, p, root.point);
+    }
+
+    private Point2D findNearestPoint(
+            final Node current,
+            final Point2D p,
+            final Point2D closestPrev
+    ) {
+        if (current == null) {
+            return closestPrev;
+        }
+        Point2D closest = closestPrev;
+        double closestDistance = closestPrev.distanceSquaredTo(p);
+        // pruning rule: if the closest point discovered so far is closer than the distance between
+        // the query point and the rectangle corresponding to a node, there is no need to explore that
+        // node (or its subtrees). That is, search a node only if it might contain a point
+        // that is closer than the best one found so far.
+        if (current.rect.distanceSquaredTo(p) > closestDistance) {
+            return closestPrev;
+        }
+        double currentDistance = current.point.distanceSquaredTo(p);
+        if (currentDistance < closestDistance) {
+            closest = current.point;
+        }
+
+        // The effectiveness of the pruning rule depends on quickly finding a nearby point.
+        // To do this, organize the recursive method so that when there are two possible subtrees to go down,
+        // you always choose the subtree that is on the same side of the splitting line as the query point as
+        // the first subtree to explore—the closest point found while exploring the first subtree may
+        // enable pruning of the second subtree.
+        if (current.compareTo(p) > 0) {
+            closest = findNearestPoint(current.left, p, closest);
+            closest = findNearestPoint(current.right, p, closest);
+        }
+        else {
+            closest = findNearestPoint(current.right, p, closest);
+            closest = findNearestPoint(current.left, p, closest);
+        }
+
+        return closest;
     }
 
     public static void main(String[] args) {

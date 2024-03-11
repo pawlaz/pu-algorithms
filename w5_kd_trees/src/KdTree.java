@@ -25,40 +25,42 @@ public class KdTree {
         root = put(root, p, true, null);
     }
 
-    private Node put(final Node node, final Point2D point, final boolean isVertical,
-                     final Node prev) {
-        if (node == null) {
+    private Node put(
+            final Node current, final Point2D point,
+            final boolean isVertical, final Node prev
+    ) {
+        if (current == null) {
             size++;
             return new Node(point, isVertical, prev);
         }
 
-        if (node.isSamePoint(point)) {
-            return node;
+        if (current.isSamePoint(point)) {
+            return current;
         }
 
-        int cmp = node.compareTo(point);
+        int cmp = current.compareTo(point);
         if (cmp > 0) {
-            node.left = put(node.left, point, !isVertical, node);
+            current.left = put(current.left, point, !isVertical, current);
         }
         else if (cmp < 0) {
-            node.right = put(node.right, point, !isVertical, node);
+            current.right = put(current.right, point, !isVertical, current);
         }
 
-        return node;
+        return current;
     }
 
-    private Node get(final Node node, final Point2D point) {
-        if (node == null) return null;
+    private Node get(final Node current, final Point2D point) {
+        if (current == null) return null;
 
-        if (node.isSamePoint(point)) {
-            return node;
+        if (current.isSamePoint(point)) {
+            return current;
         }
 
-        if (node.compareTo(point) > 0) {
-            return get(node.left, point);
+        if (current.compareTo(point) > 0) {
+            return get(current.left, point);
         }
         else {
-            return get(node.right, point);
+            return get(current.right, point);
         }
     }
 

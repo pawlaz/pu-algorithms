@@ -8,6 +8,9 @@ import edu.princeton.cs.algs4.Point2D;
 import edu.princeton.cs.algs4.RectHV;
 import edu.princeton.cs.algs4.StdDraw;
 
+import java.util.LinkedList;
+import java.util.List;
+
 public class KdTree {
     private Node root = null;
     private int size = 0;
@@ -85,8 +88,28 @@ public class KdTree {
 
     public Iterable<Point2D> range(final RectHV rect) {
         validateArgs(rect);
-        return null; // TODO
+        return findPointsInRange(root, rect, new LinkedList<>());
+    }
 
+    // pruning rule: if the query rectangle does not intersect the rectangle corresponding to a node,
+    // there is no need to explore that node (or its subtrees). A subtree is searched only
+    // if it might contain a point contained in the query rectangle.
+    private List<Point2D> findPointsInRange(
+            final Node current,
+            final RectHV rect,
+            final List<Point2D> acc
+    ) {
+        if (current == null) {
+            return acc;
+        }
+        if (rect.intersects(current.rect)) {
+            if (rect.contains(current.point)) {
+                acc.add(current.point);
+            }
+            findPointsInRange(current.left, rect, acc);
+            findPointsInRange(current.right, rect, acc);
+        }
+        return acc;
     }
 
     public Point2D nearest(final Point2D p) {

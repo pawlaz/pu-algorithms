@@ -15,7 +15,7 @@ public class WordNet {
     private static final String NOUNS_SEPARATOR = " ";
     private final Map<Integer, String> synsetValues;
     private final Map<String, Set<Integer>> nouns;
-    private final Digraph digraph;
+    private final SAP sap;
 
     public WordNet(final String synsetsPath, final String hypernymsPath) {
         validateArguments(synsetsPath, hypernymsPath);
@@ -24,11 +24,12 @@ public class WordNet {
         this.nouns = new HashMap<>();
         parseSynsetsFile(synsetsPath);
 
-        this.digraph = new Digraph(synsetValues.size());
-        parseHypernymsFile(hypernymsPath);
+        Digraph digraph = new Digraph(synsetValues.size());
+        parseHypernymsFile(hypernymsPath, digraph);
+        validateCycles(digraph);
+        validateRoots(digraph);
 
-        validateCycles(this.digraph);
-        validateRoots(this.digraph);
+        sap = new SAP(digraph);
     }
 
     private void validateArguments(final Object... args) {
@@ -72,7 +73,7 @@ public class WordNet {
         }
     }
 
-    private void parseHypernymsFile(final String hypernymsPath) {
+    private void parseHypernymsFile(final String hypernymsPath, final Digraph d) {
         In reader = new In(hypernymsPath);
         while (reader.hasNextLine()) {
             String[] hypernymsDefinition = reader.readLine().split(COLUMNS_SEPARATOR);
@@ -80,7 +81,7 @@ public class WordNet {
 
             for (int i = 1; i < hypernymsDefinition.length; i++) {
                 int hypId = Integer.parseInt(hypernymsDefinition[i]);
-                digraph.addEdge(synsetId, hypId);
+                d.addEdge(synsetId, hypId);
             }
         }
     }
@@ -94,24 +95,33 @@ public class WordNet {
         return nouns.containsKey(word);
     }
 
-    // distance between nounA and nounB (defined below)
     public int distance(final String nounA, final String nounB) {
         validateArguments(nounA, nounB);
-        return -1; // TODO
+        Set<Integer> aSynsetIds = nouns.get(nounA);
+        Set<Integer> bSynsetIds = nouns.get(nounB);
+        if (aSynsetIds == null || bSynsetIds == null) {
+            return -1;
+        }
+
+        return sap.length(aSynsetIds, bSynsetIds);
     }
 
-    // a synset (second field of synsets.txt) that is the common ancestor of nounA and nounB
-    // in a shortest ancestral path (defined below)
+    // common ancestor of nounA and nounB in a shortest ancestral path
     public String sap(final String nounA, final String nounB) {
         validateArguments(nounA, nounB);
-        return ""; // TODO
+        Set<Integer> aSynsetIds = nouns.get(nounA);
+        Set<Integer> bSynsetIds = nouns.get(nounB);
+        if (aSynsetIds == null || bSynsetIds == null) {
+            return null;
+        }
+        return synsetValues.get(sap.ancestor(aSynsetIds, bSynsetIds));
     }
-
-    // do unit testing of this class
+    
     public static void main(String[] args) {
         String synsetsPath = "./resources/wordnet/synsets15.txt";
         String hypernymsPath = "./resources/wordnet/hypernyms15Path.txt";
         WordNet wordNet = new WordNet(synsetsPath, hypernymsPath);
-        wordNet.isNoun("test");
+        System.out.println(wordNet.distance("a", "n"));
+        System.out.println(wordNet.sap("a", "n"));
     }
 }

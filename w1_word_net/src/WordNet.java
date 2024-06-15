@@ -116,7 +116,7 @@ public class WordNet {
         }
         return synsetValues.get(sap.ancestor(aSynsetIds, bSynsetIds));
     }
-    
+
     public static void main(String[] args) {
         String synsetsPath = "./resources/wordnet/synsets15.txt";
         String hypernymsPath = "./resources/wordnet/hypernyms15Path.txt";

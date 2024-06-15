@@ -1,4 +1,5 @@
 import edu.princeton.cs.algs4.Digraph;
+import edu.princeton.cs.algs4.DirectedCycle;
 import edu.princeton.cs.algs4.In;
 
 import java.util.Arrays;
@@ -25,12 +26,34 @@ public class WordNet {
 
         this.digraph = new Digraph(synsetValues.size());
         parseHypernymsFile(hypernymsPath);
+
+        validateCycles(this.digraph);
+        validateRoots(this.digraph);
     }
 
     private void validateArguments(final Object... args) {
         boolean isAnyNull = Arrays.stream(args).anyMatch(Objects::isNull);
         if (isAnyNull) {
             throw new IllegalArgumentException("Argument can't be null");
+        }
+    }
+
+    private void validateCycles(final Digraph d) {
+        DirectedCycle dc = new DirectedCycle(d);
+        if (dc.hasCycle()) {
+            throw new IllegalArgumentException("Cycles detected");
+        }
+    }
+
+    private void validateRoots(final Digraph d) {
+        int roots = 0;
+        for (int i = 0; i < d.V(); i++) {
+            if (d.outdegree(i) == 0) {
+                roots++;
+            }
+        }
+        if (roots != 1) {
+            throw new IllegalArgumentException("Non-rooted graph detected");
         }
     }
 
@@ -67,17 +90,20 @@ public class WordNet {
     }
 
     public boolean isNoun(final String word) {
+        validateArguments(word);
         return nouns.containsKey(word);
     }
 
     // distance between nounA and nounB (defined below)
     public int distance(final String nounA, final String nounB) {
+        validateArguments(nounA, nounB);
         return -1; // TODO
     }
 
     // a synset (second field of synsets.txt) that is the common ancestor of nounA and nounB
     // in a shortest ancestral path (defined below)
     public String sap(final String nounA, final String nounB) {
+        validateArguments(nounA, nounB);
         return ""; // TODO
     }
 

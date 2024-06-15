@@ -35,7 +35,10 @@ public class SAP {
                 throw new IllegalArgumentException("Argument can't be null");
             }
 
-            for (int i : iter) {
+            for (Integer i : iter) {
+                if (i == null) {
+                    throw new IllegalArgumentException("Iterable contains null");
+                }
                 validateRange(i);
             }
         }

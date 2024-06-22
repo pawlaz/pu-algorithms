@@ -5,7 +5,7 @@ import java.util.Arrays;
 
 public class SeamCarver {
     private static final double BORDER_PIXEL_ENERGY = 1000;
-    private final Picture p;
+    private Picture p;
     private int[][] edgeTo;
 
     public SeamCarver(final Picture picture) {
@@ -140,24 +140,62 @@ public class SeamCarver {
         return seam;
     }
 
-    private void validateSeam(int[] seam) {
-        if (seam == null) {
-            throw new IllegalArgumentException("The seam can't be null");
+    private void validateSeam(int[] seam, int min, int max) {
+        if (seam == null || min <= 1 || seam.length != max) {
+            throw new IllegalArgumentException("Incorrect seam");
         }
+    }
 
-        // TODO
-        // Throw an IllegalArgumentException if removeVerticalSeam() or removeHorizontalSeam() is called with an array of the wrong length
-        // or if the array is not a valid seam (i.e., either an entry is outside its prescribed range or two adjacent entries differ by more than 1).
-        // Throw an IllegalArgumentException if removeVerticalSeam() is called when the width of the picture is less than or equal to 1
-        // or if removeHorizontalSeam() is called when the height of the picture is less than or equal to 1.
+    private void validateSeam(int seamValue, int prevSeamValue, int maxValue) {
+        if (Math.abs(seamValue - prevSeamValue) > 1 || seamValue < 0 || seamValue >= maxValue) {
+            throw new IllegalArgumentException();
+        }
     }
 
     public void removeHorizontalSeam(int[] seam) {
-        validateSeam(seam);
+        validateSeam(seam, height(), width());
+        Picture resizedPicture = new Picture(this.width() - 1, this.height());
+        int prevSeamValue = seam[0];
+
+        for (int x = 0; x < this.width(); x++) {
+            int currentSeamValue = seam[x];
+            validateSeam(currentSeamValue, prevSeamValue, height());
+            prevSeamValue = seam[x];
+
+            for (int y = 0; y < this.height(); y++) {
+                if (seam[x] == y) {
+                    continue;
+                }
+
+                Color color = this.p.get(x, y);
+                resizedPicture.set(x, seam[x] > y ? y : y - 1, color);
+            }
+        }
+
+        this.p = resizedPicture;
     }
 
     public void removeVerticalSeam(int[] seam) {
-        validateSeam(seam);
+        validateSeam(seam, width(), height());
+        Picture resizedPicture = new Picture(this.width() - 1, this.height());
+
+        int prevSeamValue = seam[0];
+        for (int y = 0; y < this.height(); y++) {
+            int currentSeamValue = seam[y];
+            validateSeam(currentSeamValue, prevSeamValue, width());
+            prevSeamValue = currentSeamValue;
+
+            for (int x = 0; x < this.width(); x++) {
+                if (currentSeamValue == x) {
+                    continue;
+                }
+
+                Color color = this.p.get(x, y);
+                resizedPicture.set(currentSeamValue > x ? x : x - 1, y, color);
+            }
+        }
+
+        this.p = resizedPicture;
     }
 
     public static void main(String[] args) {

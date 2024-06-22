@@ -154,48 +154,46 @@ public class SeamCarver {
 
     public void removeHorizontalSeam(int[] seam) {
         validateSeam(seam, height(), width());
-        Picture resizedPicture = new Picture(this.width() - 1, this.height());
-        int prevSeamValue = seam[0];
+        Picture newPicture = new Picture(this.width(), this.height() - 1);
 
+        int prevSeam = seam[0];
         for (int x = 0; x < this.width(); x++) {
-            int currentSeamValue = seam[x];
-            validateSeam(currentSeamValue, prevSeamValue, height());
-            prevSeamValue = seam[x];
+            validateSeam(seam[x], prevSeam, height());
 
+            prevSeam = seam[x];
             for (int y = 0; y < this.height(); y++) {
                 if (seam[x] == y) {
                     continue;
                 }
 
                 Color color = this.p.get(x, y);
-                resizedPicture.set(x, seam[x] > y ? y : y - 1, color);
+                newPicture.set(x, seam[x] > y ? y : y - 1, color);
             }
         }
 
-        this.p = resizedPicture;
+        this.p = newPicture;
     }
 
     public void removeVerticalSeam(int[] seam) {
         validateSeam(seam, width(), height());
-        Picture resizedPicture = new Picture(this.width() - 1, this.height());
+        Picture newPicture = new Picture(this.width() - 1, this.height());
 
-        int prevSeamValue = seam[0];
+        int prevSeam = seam[0];
         for (int y = 0; y < this.height(); y++) {
-            int currentSeamValue = seam[y];
-            validateSeam(currentSeamValue, prevSeamValue, width());
-            prevSeamValue = currentSeamValue;
+            validateSeam(seam[y], prevSeam, width());
 
+            prevSeam = seam[y];
             for (int x = 0; x < this.width(); x++) {
-                if (currentSeamValue == x) {
+                if (seam[y] == x) {
                     continue;
                 }
 
                 Color color = this.p.get(x, y);
-                resizedPicture.set(currentSeamValue > x ? x : x - 1, y, color);
+                newPicture.set(seam[y] > x ? x : x - 1, y, color);
             }
         }
 
-        this.p = resizedPicture;
+        this.p = newPicture;
     }
 
     public static void main(String[] args) {

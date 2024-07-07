@@ -19,8 +19,10 @@ public class BoggleSolver {
             throw new IllegalArgumentException("The dictionary can't be null");
         }
         for (String word : dictionary) {
-            this.words.add(word);
-            put(root, word, 0);
+            if (word.length() >= 3) {
+                this.words.add(word);
+                put(root, word, 0);
+            }
         }
     }
 
@@ -53,12 +55,40 @@ public class BoggleSolver {
         return get(x.next[charIndex(word.charAt(d))], word, d + 1);
     }
 
+    private boolean contains(final String word) {
+        Node x = get(root, word, 0);
+        return x != null && x.value != null;
+    }
+
     public Iterable<String> getAllValidWords(final BoggleBoard board) {
+        if (board == null) {
+            throw new IllegalArgumentException("Board can't be null");
+        }
+
         return null;
     }
 
     public int scoreOf(final String word) {
-        return 0;
+        if (word == null) {
+            throw new IllegalArgumentException("Word can't be null");
+        }
+        if (!contains(word) || word.length() < 3) {
+            return 0;
+        }
+
+        switch (word.length()) {
+            case 3:
+            case 4:
+                return 1;
+            case 5:
+                return 2;
+            case 6:
+                return 3;
+            case 7:
+                return 5;
+            default:
+                return 11;
+        }
     }
 
     public static void main(String[] args) {

@@ -61,7 +61,6 @@ public class MoveToFront {
     // if args[0] is "+", apply move-to-front decoding
     public static void main(String[] args) {
         String key = args[0];
-
         switch (key) {
             case "-":
                 encode();
@@ -70,7 +69,7 @@ public class MoveToFront {
                 decode();
                 break;
             default:
-                throw new IllegalArgumentException("Unknown key: " + args[0]);
+                throw new IllegalArgumentException("Unknown key: " + key);
         }
     }
 }
